@@ -3,7 +3,11 @@
 // No I/O here on purpose, so this stays unit-testable without a live gateway.
 // -----------------------------------------------------------------------------
 
-import { DEVICE_FEATURE_CATEGORIES, DEVICE_FEATURE_TYPES, DEVICE_FEATURE_UNITS } from '@gladysassistant/integration-sdk';
+import {
+  DEVICE_FEATURE_CATEGORIES,
+  DEVICE_FEATURE_TYPES,
+  DEVICE_FEATURE_UNITS,
+} from '@gladysassistant/integration-sdk';
 
 const DEVICE_TYPE = 'shutter';
 const FEATURE_POSITION = 'position';

@@ -78,10 +78,18 @@ test('handleSetValue on the state feature maps OPEN/CLOSED to 0%/100%', async ()
   const registry = fakeRegistry([product]);
   const { device, stateFeature } = idsFor(product);
 
-  await handleSetValue(gladys, registry, { device, feature: stateFeature, value: SHUTTER_STATE.OPEN });
+  await handleSetValue(gladys, registry, {
+    device,
+    feature: stateFeature,
+    value: SHUTTER_STATE.OPEN,
+  });
   assert.equal(product.positionCalls.at(-1), 0);
 
-  await handleSetValue(gladys, registry, { device, feature: stateFeature, value: SHUTTER_STATE.CLOSED });
+  await handleSetValue(gladys, registry, {
+    device,
+    feature: stateFeature,
+    value: SHUTTER_STATE.CLOSED,
+  });
   assert.equal(product.positionCalls.at(-1), 1);
 });
 
@@ -90,7 +98,11 @@ test('handleSetValue on the state feature calls stopAsync for STOPPED', async ()
   const registry = fakeRegistry([product]);
   const { device, stateFeature } = idsFor(product);
 
-  await handleSetValue(gladys, registry, { device, feature: stateFeature, value: SHUTTER_STATE.STOPPED });
+  await handleSetValue(gladys, registry, {
+    device,
+    feature: stateFeature,
+    value: SHUTTER_STATE.STOPPED,
+  });
   assert.equal(product.stopCalls, 1);
   assert.equal(product.positionCalls.length, 0);
 });

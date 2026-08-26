@@ -25,10 +25,10 @@ déjà appairés à une passerelle Velux **KLF200** sur le réseau local.
 
 Depuis l'écran de configuration de l'intégration dans Gladys :
 
-| Champ | Description |
-|---|---|
-| Adresse IP du KLF200 | IP locale de la passerelle |
-| Mot de passe du KLF200 | Mot de passe défini sur la passerelle |
+| Champ                       | Description                                           |
+| --------------------------- | ----------------------------------------------------- |
+| Adresse IP du KLF200        | IP locale de la passerelle                            |
+| Mot de passe du KLF200      | Mot de passe défini sur la passerelle                 |
 | Empreinte TLS (optionnelle) | Épinglage du certificat ; laisser vide pour l'ignorer |
 
 ## Développement

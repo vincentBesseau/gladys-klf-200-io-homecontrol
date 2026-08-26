@@ -22,7 +22,10 @@ test('ensureConnected() only starts one underlying connection attempt for concur
     return realConnect();
   };
 
-  const [first, second] = await Promise.allSettled([conn.ensureConnected(), conn.ensureConnected()]);
+  const [first, second] = await Promise.allSettled([
+    conn.ensureConnected(),
+    conn.ensureConnected(),
+  ]);
 
   assert.equal(connectAttempts, 1, 'only one underlying connection attempt should have started');
   assert.equal(first.status, 'rejected');

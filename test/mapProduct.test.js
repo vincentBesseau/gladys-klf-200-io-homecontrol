@@ -35,7 +35,11 @@ test('productToDiscoveredDevice builds a shutter with position and state feature
   const device = productToDiscoveredDevice(gladys, fakeProduct());
   assert.equal(device.name, 'Volet salon');
   assert.equal(device.external_id, productExternalIds(gladys, fakeProduct()).device);
-  assert.equal(device.should_poll, true, 'should_poll must be true or Gladys never schedules onPoll for it');
+  assert.equal(
+    device.should_poll,
+    true,
+    'should_poll must be true or Gladys never schedules onPoll for it',
+  );
   assert.ok(
     VALID_POLL_FREQUENCIES_MS.includes(device.poll_frequency),
     `poll_frequency must be one of ${VALID_POLL_FREQUENCIES_MS.join(', ')} (ms), got ${device.poll_frequency}`,
@@ -74,7 +78,9 @@ test('productToPercent falls back to CurrentPosition when TargetPosition is not 
 });
 
 test('productToPercent defaults to 0 when neither position is a valid number', () => {
-  const percent = productToPercent(fakeProduct({ TargetPosition: undefined, CurrentPosition: undefined }));
+  const percent = productToPercent(
+    fakeProduct({ TargetPosition: undefined, CurrentPosition: undefined }),
+  );
   assert.equal(percent, 0);
 });
 

@@ -80,7 +80,9 @@ async function handleSetState(gladys, product, value) {
   }
 
   const targetPercent = value === SHUTTER_STATE.OPEN ? 0 : 100;
-  logger.info(`Setting '${product.Name}' to ${value === SHUTTER_STATE.OPEN ? 'OPEN' : 'CLOSED'} (${targetPercent}%)`);
+  logger.info(
+    `Setting '${product.Name}' to ${value === SHUTTER_STATE.OPEN ? 'OPEN' : 'CLOSED'} (${targetPercent}%)`,
+  );
   await product.setTargetPositionAsync(targetPercent / 100);
   scheduleRefresh(gladys, product, currentPercent, targetPercent);
 }
@@ -110,6 +112,9 @@ async function refreshAndPublish(gladys, product) {
   logger.info(`'${product.Name}' is now at ${percent}%`);
   await gladys.publishStates([
     { device_feature_external_id: positionFeatureExternalId(gladys, product), state: percent },
-    { device_feature_external_id: stateFeatureExternalId(gladys, product), state: percentToState(percent) },
+    {
+      device_feature_external_id: stateFeatureExternalId(gladys, product),
+      state: percentToState(percent),
+    },
   ]);
 }
