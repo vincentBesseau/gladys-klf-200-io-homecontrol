@@ -1,6 +1,6 @@
 {
   "name": "gladys-klf-200-io-homecontrol",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Intégration Gladys Assistant : découverte et pilotage des volets Velux io-homecontrol via une passerelle KLF200.",
   "type": "module",
