@@ -7,7 +7,7 @@
     "fr": "Découvre et pilote les volets io-homecontrol déjà appairés à une passerelle Velux KLF200."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/vbdev-freelance/gladys-klf-200-io-homecontrol:1.0.0",
+  "docker_image": "ghcr.io/vincentbesseau/gladys-klf-200-io-homecontrol:1.0.0",
   "cover_image": "https://raw.githubusercontent.com/vincentBesseau/gladys-klf-200-io-homecontrol/main/assets/cover.png",
   "gladys_version": ">=4.86.0",
   "categories": ["lighting"],
