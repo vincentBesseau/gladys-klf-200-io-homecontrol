@@ -61,16 +61,17 @@ test('findProductByDeviceExternalId returns undefined for an unknown device', ()
   assert.equal(found, undefined);
 });
 
-test('handleSetValue on the position feature clamps to 0-100 and converts to a 0-1 ratio', async () => {
+test('handleSetValue on the position feature clamps to 0-100 and converts to a native ratio', async () => {
+  // Gladys convention: 0 = closed, 100 = open. Native ratio: 0 = open, 1 = closed.
   const product = fakeProduct();
   const registry = fakeRegistry([product]);
   const { device, positionFeature } = idsFor(product);
 
   await handleSetValue(gladys, registry, { device, feature: positionFeature, value: 150 });
-  assert.equal(product.positionCalls.at(-1), 1);
+  assert.equal(product.positionCalls.at(-1), 0); // clamped to 100% (open) -> native 0
 
   await handleSetValue(gladys, registry, { device, feature: positionFeature, value: -20 });
-  assert.equal(product.positionCalls.at(-1), 0);
+  assert.equal(product.positionCalls.at(-1), 1); // clamped to 0% (closed) -> native 1
 });
 
 test('handleSetValue on the state feature maps OPEN/CLOSED to 0%/100%', async () => {

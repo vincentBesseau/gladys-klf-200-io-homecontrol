@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DEVICE_FEATURE_CATEGORIES, DEVICE_FEATURE_TYPES } from '@gladysassistant/integration-sdk';
 import {
+  percentToNativeRatio,
   percentToState,
   positionFeatureExternalId,
   productExternalIds,
@@ -67,25 +68,35 @@ test('two different NodeIDs never collide on external_id', () => {
   assert.notEqual(a.external_id, b.external_id);
 });
 
+// klf-200-api reports the native io-homecontrol ratio (0 = open, 1 = closed);
+// productToPercent must flip it to the Gladys/Google Home convention
+// (0 = closed, 100 = open — see mapProduct.js for why).
+
 test('productToPercent prefers TargetPosition when it is a valid number', () => {
   const percent = productToPercent(fakeProduct({ TargetPosition: 0.75, CurrentPosition: 0.2 }));
-  assert.equal(percent, 75);
+  assert.equal(percent, 25); // native 75% closed -> Gladys 25% open
 });
 
 test('productToPercent falls back to CurrentPosition when TargetPosition is not a number', () => {
   const percent = productToPercent(fakeProduct({ TargetPosition: NaN, CurrentPosition: 0.3 }));
-  assert.equal(percent, 30);
+  assert.equal(percent, 70); // native 30% closed -> Gladys 70% open
 });
 
-test('productToPercent defaults to 0 when neither position is a valid number', () => {
+test('productToPercent defaults to fully open when neither position is a valid number', () => {
   const percent = productToPercent(
     fakeProduct({ TargetPosition: undefined, CurrentPosition: undefined }),
   );
-  assert.equal(percent, 0);
+  assert.equal(percent, 100); // native default 0 (open) -> Gladys 100% open
 });
 
-test('percentToState maps 0%/100%/partial to OPEN/CLOSED/STOPPED', () => {
-  assert.equal(percentToState(0), SHUTTER_STATE.OPEN);
-  assert.equal(percentToState(100), SHUTTER_STATE.CLOSED);
+test('percentToState maps 0%/100%/partial to CLOSED/OPEN/STOPPED', () => {
+  assert.equal(percentToState(0), SHUTTER_STATE.CLOSED);
+  assert.equal(percentToState(100), SHUTTER_STATE.OPEN);
   assert.equal(percentToState(42), SHUTTER_STATE.STOPPED);
+});
+
+test('percentToNativeRatio converts the Gladys percent back to the native ratio', () => {
+  assert.equal(percentToNativeRatio(100), 0); // fully open -> native 0
+  assert.equal(percentToNativeRatio(0), 1); // fully closed -> native 1
+  assert.equal(percentToNativeRatio(25), 0.75);
 });

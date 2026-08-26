@@ -9,6 +9,7 @@
 
 import { createLogger } from '@gladysassistant/integration-sdk';
 import {
+  percentToNativeRatio,
   percentToState,
   positionFeatureExternalId,
   productExternalIds,
@@ -61,11 +62,12 @@ export async function handleSetValue(gladys, productRegistry, { device, feature,
 }
 
 async function handleSetPosition(gladys, product, value) {
+  // Gladys convention: 0 = closed, 100 = open (see mapProduct.js).
   const targetPercent = Math.max(0, Math.min(100, value));
   const currentPercent = productToPercent(product);
   logger.info(`Moving '${product.Name}' from ${currentPercent}% to ${targetPercent}%`);
 
-  await product.setTargetPositionAsync(targetPercent / 100);
+  await product.setTargetPositionAsync(percentToNativeRatio(targetPercent));
   scheduleRefresh(gladys, product, currentPercent, targetPercent);
 }
 
@@ -79,11 +81,12 @@ async function handleSetState(gladys, product, value) {
     return;
   }
 
-  const targetPercent = value === SHUTTER_STATE.OPEN ? 0 : 100;
+  // Gladys convention: 0 = closed, 100 = open (see mapProduct.js).
+  const targetPercent = value === SHUTTER_STATE.OPEN ? 100 : 0;
   logger.info(
     `Setting '${product.Name}' to ${value === SHUTTER_STATE.OPEN ? 'OPEN' : 'CLOSED'} (${targetPercent}%)`,
   );
-  await product.setTargetPositionAsync(targetPercent / 100);
+  await product.setTargetPositionAsync(percentToNativeRatio(targetPercent));
   scheduleRefresh(gladys, product, currentPercent, targetPercent);
 }
 

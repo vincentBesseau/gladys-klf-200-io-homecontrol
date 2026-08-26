@@ -82,12 +82,24 @@ export function productToDiscoveredDevice(gladys, product) {
   };
 }
 
+// klf-200-api's own TargetPosition/CurrentPosition (0-1) follow the raw
+// io-homecontrol convention: 0 = fully open, 1 = fully closed — confirmed
+// against real hardware. Gladys' own ecosystem (and, concretely, Google
+// Home's OpenClose trait: "openPercent, where 0 is closed and 100 is fully
+// open") expects the OPPOSITE: 0% = closed, 100% = open. Gladys' own UI
+// doesn't care either way (it just showed a number), so this only surfaced
+// once a device was exposed through Google Home, where every command came
+// back inverted. `productToPercent` converts native -> Gladys convention;
+// `percentToNativeRatio` converts back for the hardware call. Never call
+// `setTargetPositionAsync` with a Gladys-convention percent directly.
+
 /**
- * Current position as a 0-100 percent integer. TargetPosition is preferred
- * over CurrentPosition right after a move command (mirrors the heuristic
- * already used by the standalone MQTT bridge): the gateway reports the
- * target immediately, while CurrentPosition lags until the shutter finishes
- * moving and reports back.
+ * Current position as a 0-100 percent integer, 0 = closed, 100 = open
+ * (Gladys/Google Home convention). TargetPosition is preferred over
+ * CurrentPosition right after a move command (mirrors the heuristic already
+ * used by the standalone MQTT bridge): the gateway reports the target
+ * immediately, while CurrentPosition lags until the shutter finishes moving
+ * and reports back.
  */
 export function productToPercent(product) {
   const raw =
@@ -96,14 +108,23 @@ export function productToPercent(product) {
       : typeof product.CurrentPosition === 'number' && !Number.isNaN(product.CurrentPosition)
         ? product.CurrentPosition
         : 0;
-  return Math.round(raw * 100);
+  return 100 - Math.round(raw * 100);
+}
+
+/**
+ * Converts a Gladys-convention percent (0 = closed, 100 = open) to the
+ * native io-homecontrol ratio (0 = open, 1 = closed) expected by
+ * `setTargetPositionAsync`.
+ */
+export function percentToNativeRatio(percent) {
+  return (100 - percent) / 100;
 }
 
 export function percentToState(percent) {
-  if (percent === 0) {
+  if (percent === 100) {
     return SHUTTER_STATE.OPEN;
   }
-  if (percent === 100) {
+  if (percent === 0) {
     return SHUTTER_STATE.CLOSED;
   }
   return SHUTTER_STATE.STOPPED;
