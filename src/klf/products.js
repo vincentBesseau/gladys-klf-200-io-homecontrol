@@ -16,8 +16,9 @@ export class ProductRegistry {
   }
 
   async refresh() {
-    const klf = await this.klfConnection.ensureConnected();
-    this.products = await Products.createProductsAsync(klf);
+    this.products = await this.klfConnection.runExclusive(() =>
+      Products.createProductsAsync(this.klfConnection.klf),
+    );
     logger.info(`Loaded ${this.products.Products.length} product(s) from the KLF200`);
     return this.products.Products;
   }
@@ -27,6 +28,15 @@ export class ProductRegistry {
       await this.refresh();
     }
     return this.products.Products;
+  }
+
+  /**
+   * Passthrough so callers that already hold a ProductRegistry (shutter.js)
+   * don't need a separate reference to the KlfConnection to serialize the
+   * commands they send through a cached Product.
+   */
+  runExclusive(fn) {
+    return this.klfConnection.runExclusive(fn);
   }
 
   /**

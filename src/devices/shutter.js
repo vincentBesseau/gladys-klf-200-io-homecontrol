@@ -54,30 +54,32 @@ export async function handleSetValue(gladys, productRegistry, { device, feature,
   }
 
   if (feature.external_id === stateFeatureExternalId(gladys, product)) {
-    await handleSetState(gladys, product, value);
+    await handleSetState(gladys, productRegistry, product, value);
     return;
   }
 
-  await handleSetPosition(gladys, product, value);
+  await handleSetPosition(gladys, productRegistry, product, value);
 }
 
-async function handleSetPosition(gladys, product, value) {
+async function handleSetPosition(gladys, productRegistry, product, value) {
   // Gladys convention: 0 = closed, 100 = open (see mapProduct.js).
   const targetPercent = Math.max(0, Math.min(100, value));
   const currentPercent = productToPercent(product);
   logger.info(`Moving '${product.Name}' from ${currentPercent}% to ${targetPercent}%`);
 
-  await product.setTargetPositionAsync(percentToNativeRatio(targetPercent));
-  scheduleRefresh(gladys, product, currentPercent, targetPercent);
+  await productRegistry.runExclusive(() =>
+    product.setTargetPositionAsync(percentToNativeRatio(targetPercent)),
+  );
+  scheduleRefresh(gladys, productRegistry, product, currentPercent, targetPercent);
 }
 
-async function handleSetState(gladys, product, value) {
+async function handleSetState(gladys, productRegistry, product, value) {
   const currentPercent = productToPercent(product);
 
   if (value === SHUTTER_STATE.STOPPED) {
     logger.info(`Stopping '${product.Name}' at its current position`);
-    await product.stopAsync();
-    scheduleRefresh(gladys, product, currentPercent, currentPercent);
+    await productRegistry.runExclusive(() => product.stopAsync());
+    scheduleRefresh(gladys, productRegistry, product, currentPercent, currentPercent);
     return;
   }
 
@@ -86,15 +88,17 @@ async function handleSetState(gladys, product, value) {
   logger.info(
     `Setting '${product.Name}' to ${value === SHUTTER_STATE.OPEN ? 'OPEN' : 'CLOSED'} (${targetPercent}%)`,
   );
-  await product.setTargetPositionAsync(percentToNativeRatio(targetPercent));
-  scheduleRefresh(gladys, product, currentPercent, targetPercent);
+  await productRegistry.runExclusive(() =>
+    product.setTargetPositionAsync(percentToNativeRatio(targetPercent)),
+  );
+  scheduleRefresh(gladys, productRegistry, product, currentPercent, targetPercent);
 }
 
-function scheduleRefresh(gladys, product, currentPercent, targetPercent) {
+function scheduleRefresh(gladys, productRegistry, product, currentPercent, targetPercent) {
   const distance = Math.abs(currentPercent - targetPercent);
   const delay = Math.max(MIN_MOVE_DELAY_MS, (distance / 100) * MAX_MOVE_DELAY_MS);
   setTimeout(() => {
-    refreshAndPublish(gladys, product).catch((error) =>
+    refreshAndPublish(gladys, productRegistry, product).catch((error) =>
       logger.error(`Failed to refresh '${product.Name}' after a move`, error),
     );
   }, delay);
@@ -106,11 +110,11 @@ export async function handlePoll(gladys, productRegistry, device) {
     logger.warn(`Poll ignored: unknown shutter ${device.external_id}`);
     return;
   }
-  await refreshAndPublish(gladys, product);
+  await refreshAndPublish(gladys, productRegistry, product);
 }
 
-async function refreshAndPublish(gladys, product) {
-  await product.refreshAsync();
+async function refreshAndPublish(gladys, productRegistry, product) {
+  await productRegistry.runExclusive(() => product.refreshAsync());
   const percent = productToPercent(product);
   logger.info(`'${product.Name}' is now at ${percent}%`);
   await gladys.publishStates([

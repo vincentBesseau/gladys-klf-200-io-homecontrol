@@ -28,6 +28,7 @@ export class KlfConnection {
     this.klf = null;
     this.crashCount = 0;
     this.connecting = null;
+    this.queue = Promise.resolve();
   }
 
   isConnected() {
@@ -60,6 +61,32 @@ export class KlfConnection {
       });
     }
     return this.connecting;
+  }
+
+  /**
+   * Runs `fn()` once every previously queued operation has settled (success
+   * or failure), guaranteeing the KLF200 never sees two requests in flight
+   * at once on the shared session.
+   *
+   * klf-200-api has no queue or lock of its own around sendFrameAsync, and
+   * the gateway's Busy error notification carries no session id — so under
+   * concurrent commands (e.g. a Gladys scene moving several shutters at
+   * once), a single Busy notification rejects EVERY currently pending
+   * command, not just the one that overran the gateway. The standalone
+   * mqtt-klf.js bridge already worked around this with its own
+   * commandQueue/enqueueCommand; this is the same pattern.
+   */
+  runExclusive(fn) {
+    const run = async () => {
+      await this.ensureConnected();
+      return fn();
+    };
+    const result = this.queue.then(run, run);
+    this.queue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
   }
 
   async _connect() {

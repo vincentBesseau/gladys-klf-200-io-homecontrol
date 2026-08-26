@@ -37,6 +37,9 @@ function fakeRegistry(products) {
     async refresh() {
       return products;
     },
+    async runExclusive(fn) {
+      return fn();
+    },
   };
 }
 
