@@ -3,7 +3,7 @@
 [![Latest version](https://img.shields.io/github/v/tag/vincentBesseau/gladys-klf-200-io-homecontrol?label=version)](https://github.com/vincentBesseau/gladys-klf-200-io-homecontrol/tags)
 [![CI](https://github.com/vincentBesseau/gladys-klf-200-io-homecontrol/actions/workflows/ci.yml/badge.svg)](https://github.com/vincentBesseau/gladys-klf-200-io-homecontrol/actions/workflows/ci.yml)
 [![Docker pulls](https://ghcr-badge.elias.eu.org/shield/vincentBesseau/gladys-klf-200-io-homecontrol/gladys-klf-200-io-homecontrol)](https://github.com/vincentBesseau/gladys-klf-200-io-homecontrol/pkgs/container/gladys-klf-200-io-homecontrol)
-[![License: UNLICENSED](https://img.shields.io/badge/license-UNLICENSED-lightgrey)](package.json)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Gladys](https://img.shields.io/badge/gladys-%3E%3D4.86.0-6f42c1)](https://gladysassistant.com)
 
 ![KLF200 - io-homecontrol integration for Gladys](assets/cover.png)
